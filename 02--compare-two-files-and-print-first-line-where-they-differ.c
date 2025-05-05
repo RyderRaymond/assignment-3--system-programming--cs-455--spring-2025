@@ -1,10 +1,11 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #define MAX_LINE_LENGTH 300
 
 void compare_two_files(FILE *, FILE *, char *argv[]);
-int compare_lines(char *, char *, char *argv[], int);
+int compare_lines(char *, char *, char *argv[], int, unsigned int);
 
 /** @brief main: main program logic
  *
@@ -56,6 +57,10 @@ int main(int argc, char *argv[]) {
  * @param argv          argument vector from main so we know the program's name and file names
  */
 void compare_two_files(FILE *first_file, FILE *second_file, char *argv[]) {
+  unsigned int largest_file_name_size = strlen(argv[1]);
+  if (strlen(argv[2]) > largest_file_name_size)
+    largest_file_name_size = strlen(argv[2]);
+
   char line_from_first_file[MAX_LINE_LENGTH], line_from_second_file[MAX_LINE_LENGTH];
   int line_number = 0;
 
@@ -68,18 +73,20 @@ void compare_two_files(FILE *first_file, FILE *second_file, char *argv[]) {
       break;
 
     if (!read_line_from_first_file && read_line_from_second_file) {
-      printf("%20s @ line %d: <<reached end of file>>\n", argv[1], line_number);
-      printf("%20s @ line %d: %s", argv[2], line_number, line_from_second_file);
+      // *s means pad the string with variable number of spaces
+      // We give it the largest file name so it only pads the shorter one
+      printf("%*s @ line %d: <<reached end of file>>\n", largest_file_name_size, argv[1], line_number);
+      printf("%*s @ line %d: %s", largest_file_name_size, argv[2], line_number, line_from_second_file);
 
       break;
     }
     else if (read_line_from_first_file && !read_line_from_second_file) {
-      printf("%20s @ line %d: %s", argv[1], line_number, line_from_first_file);
-      printf("%20s @ line %d: <<reached end of file>>\n", argv[2], line_number);
+      printf("%*s @ line %d: %s", largest_file_name_size, argv[1], line_number, line_from_first_file);
+      printf("%*s @ line %d: <<reached end of file>>\n", largest_file_name_size, argv[2], line_number);
 
       break;
     }
-    if (compare_lines(line_from_first_file, line_from_second_file, argv, line_number) == 0) {
+    if (compare_lines(line_from_first_file, line_from_second_file, argv, line_number, largest_file_name_size) == 0) {
       return;
     }
   }
@@ -87,14 +94,15 @@ void compare_two_files(FILE *first_file, FILE *second_file, char *argv[]) {
 
 /** @brief compare_lines: compare two lines, returning 1 if same and 0 if not same
  *
- * @param first_line    first line to compare
- * @param second_line   second line to compare
- * @param argv          argument vector from main to know the program's name and file names
- * @param line_number   line number for printing diffs
+ * @param first_line              first line to compare
+ * @param second_line             second line to compare
+ * @param argv                    argument vector from main to know the program's name and file names
+ * @param line_number             line number for printing diffs
+ * @param largest_file_name_size  size of largest file name so we pad the shorter one with spaces
  *
  * @return   1 if lines are the same and 0 if not the same
  */
-int compare_lines(char *first_line, char *second_line, char *argv[], int line_number) {
+int compare_lines(char *first_line, char *second_line, char *argv[], int line_number, unsigned int largest_file_name_size) {
 
   char *char_first_line = first_line;
   char *char_second_line = second_line;
@@ -109,8 +117,10 @@ int compare_lines(char *first_line, char *second_line, char *argv[], int line_nu
   }
 
   if (*char_first_line != *char_second_line) {
-    printf("%20s @ line %d: %s", argv[1], line_number, first_line);
-    printf("%20s @ line %d: %s\n", argv[2], line_number, second_line);
+    // *s means pad the string with variable number of spaces
+    // We give it the largest file name so it only pads the shorter one
+    printf("%*s @ line %d: %s", largest_file_name_size, argv[1], line_number, first_line);
+    printf("%*s @ line %d: %s\n", largest_file_name_size, argv[2], line_number, second_line);
 
     return 0;
   }
