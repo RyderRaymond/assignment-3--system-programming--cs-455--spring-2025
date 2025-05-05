@@ -4,7 +4,7 @@
 #define MAX_LINE_LENGTH 300
 
 void compare_two_files(FILE *, FILE *, char *argv[]);
-int compare_lines(char *, char *, char *argv[]);
+int compare_lines(char *, char *, char *argv[], int);
 
 /** @brief main: main program logic
  *
@@ -57,27 +57,29 @@ int main(int argc, char *argv[]) {
  */
 void compare_two_files(FILE *first_file, FILE *second_file, char *argv[]) {
   char line_from_first_file[MAX_LINE_LENGTH], line_from_second_file[MAX_LINE_LENGTH];
+  int line_number = 0;
 
   while (true) {
     int read_line_from_first_file = fgets(line_from_first_file, MAX_LINE_LENGTH, first_file) != NULL;
     int read_line_from_second_file = fgets(line_from_second_file, MAX_LINE_LENGTH, second_file) != NULL;
+    line_number++;
 
     if (!read_line_from_first_file && !read_line_from_second_file)
       break;
 
     if (!read_line_from_first_file && read_line_from_second_file) {
-      printf("%s: <<reached end of file>>\n", argv[1]);
-      printf("%s: %s\n", argv[2], line_from_second_file);
+      printf("%20s @ line %d: <<reached end of file>>\n", argv[1], line_number);
+      printf("%20s @ line %d: %s", argv[2], line_number, line_from_second_file);
 
       break;
     }
     else if (read_line_from_first_file && !read_line_from_second_file) {
-      printf("%s: %s\n", argv[1], line_from_first_file);
-      printf("%s: <<reached enf of file>>\n", argv[2]);
+      printf("%20s @ line %d: %s", argv[1], line_number, line_from_first_file);
+      printf("%20s @ line %d: <<reached end of file>>\n", argv[2], line_number);
 
       break;
     }
-    if (compare_lines(line_from_first_file, line_from_second_file, argv) == 0) {
+    if (compare_lines(line_from_first_file, line_from_second_file, argv, line_number) == 0) {
       return;
     }
   }
@@ -88,10 +90,11 @@ void compare_two_files(FILE *first_file, FILE *second_file, char *argv[]) {
  * @param first_line    first line to compare
  * @param second_line   second line to compare
  * @param argv          argument vector from main to know the program's name and file names
+ * @param line_number   line number for printing diffs
  *
  * @return   1 if lines are the same and 0 if not the same
  */
-int compare_lines(char *first_line, char *second_line, char *argv[]) {
+int compare_lines(char *first_line, char *second_line, char *argv[], int line_number) {
 
   char *char_first_line = first_line;
   char *char_second_line = second_line;
@@ -106,8 +109,8 @@ int compare_lines(char *first_line, char *second_line, char *argv[]) {
   }
 
   if (*char_first_line != *char_second_line) {
-    printf("%s: %s\n", argv[1], first_line);
-    printf("%s: %s\n", argv[2], second_line);
+    printf("%20s @ line %d: %s", argv[1], line_number, first_line);
+    printf("%20s @ line %d: %s\n", argv[2], line_number, second_line);
 
     return 0;
   }
