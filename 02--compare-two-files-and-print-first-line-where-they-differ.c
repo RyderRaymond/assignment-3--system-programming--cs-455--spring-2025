@@ -55,6 +55,7 @@ int main(int argc, char *argv[]) {
  * @param first_file    first file to compare
  * @param second_file   second file to compare
  * @param argv          argument vector from main so we know the program's name and file names
+ *
  */
 void compare_two_files(FILE *first_file, FILE *second_file, char *argv[]) {
   unsigned int largest_file_name_size = strlen(argv[1]);
