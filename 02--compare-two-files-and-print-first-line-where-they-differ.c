@@ -6,6 +6,12 @@
 void compare_two_files(FILE *, FILE *, char *argv[]);
 int compare_lines(char *, char *, char *argv[]);
 
+/** @brief main: main program logic
+ *
+ * @param argc
+ * @param argv
+ * @return 0 for successful exit, 1 for usage, 2 for cannot open first file, 3 for cannot open second file
+ */
 int main(int argc, char *argv[]) {
   FILE *first_file, *second_file;
 
@@ -39,8 +45,16 @@ int main(int argc, char *argv[]) {
     fprintf(stderr, "%s: error closing file %s:", argv[0], argv[2]);
     perror("");
   }
+
+  exit(0);
 }
 
+/** @brief compare_two_files: compares two files line by line, printing the first line in which they differ
+ *
+ * @param first_file    first file to compare
+ * @param second_file   second file to compare
+ * @param argv          argument vector from main so we know the program's name and file names
+ */
 void compare_two_files(FILE *first_file, FILE *second_file, char *argv[]) {
   char line_from_first_file[MAX_LINE_LENGTH], line_from_second_file[MAX_LINE_LENGTH];
 
@@ -73,6 +87,7 @@ void compare_two_files(FILE *first_file, FILE *second_file, char *argv[]) {
  *
  * @param first_line    first line to compare
  * @param second_line   second line to compare
+ * @param argv          argument vector from main to know the program's name and file names
  *
  * @return   1 if lines are the same and 0 if not the same
  */
