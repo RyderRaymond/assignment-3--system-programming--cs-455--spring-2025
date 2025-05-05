@@ -1,30 +1,40 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <fcntl.h>
-#include <sys/stat.h>
 
-#define COPYBUFFERSIZE 1
-/* cat: concatenate files, version 2 */
+// Set to 1 as getc reads 1 character in the original program
+#define COPY_BUFFER_SIZE 1
+
+void filecopy(int, int);
+
+/* cat: concatenate files, version 2 (with syscalls) */
 int main(int argc, char *argv[])
 {
-    int fd;
-    void filecopy(int, int);
-
+    int file_descriptor;
     char *prog = argv[0]; /* program name for errors */
+
     if (argc == 1 ) /* no args; copy standard input */
         filecopy(STDIN_FILENO, STDOUT_FILENO);
-    else
-        while (--argc > 0)
-            if ((fd = open(*++argv, O_RDONLY)) < 0) {
-                fprintf(stderr, "%s: can't open %s\n",
-                prog, *argv);
+    else {
+        while (--argc > 0) {
+            if ((file_descriptor = open(*++argv, O_RDONLY)) < 0)
+            {
+                fprintf(stderr, "%s: can't open %s: ", prog, *argv);
+                perror(""); //empty string as the fprintf in the previous line does the formatting
+
                 return 1;
-            } else {
-                filecopy(fd, STDOUT_FILENO);
-                if (close(fd) == -1) {
-                    perror("close");
+            }
+            else {
+                filecopy(file_descriptor, STDOUT_FILENO);
+
+                if (close(file_descriptor) < 0) {
+                    fprintf(stderr, "%s: %s: ",
+                    prog, *argv);
+                    perror("Error closing file");
                 }
             }
+        }
+    }
     if (ferror(stdout)) {
         fprintf(stderr, "%s: error writing stdout\n", prog);
         return 2;
@@ -33,22 +43,22 @@ int main(int argc, char *argv[])
 }
 
 /* filecopy: copy file ifp to file ofp */
-void filecopy(int fd1, int fd2) {
-    char buffer[COPYBUFFERSIZE];
-    ssize_t num_read;
+void filecopy(const int file_descriptor_in, const int file_descriptor_out) {
+    char buffer[COPY_BUFFER_SIZE];
+    ssize_t num_bytes_read;
 
-    // 0 indicates end of file for read syscall, despite EOF being -1, which is error for read
-    while ((num_read = read(fd1, buffer, COPYBUFFERSIZE)) != 0) {
+    // 0 indicates end of file for the read syscall, despite EOF being -1, which is an error for the read syscall
+    while ((num_bytes_read = read(file_descriptor_in, buffer, COPY_BUFFER_SIZE)) != 0) {
 
-        if (num_read < 0) {
-            perror("read");
+        if (num_bytes_read < 0) {
+            perror("Error reading file");
             return;
         }
 
-        ssize_t num_written = write(fd2, buffer, num_read);
+        ssize_t num_written = write(file_descriptor_out, buffer, num_bytes_read);
 
         if (num_written < 0) {
-            perror("write");
+            perror("Error writing file contents");
             return;
         }
     }
