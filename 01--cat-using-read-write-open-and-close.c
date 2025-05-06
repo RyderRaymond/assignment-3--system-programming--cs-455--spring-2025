@@ -8,6 +8,9 @@
 void filecopy(int, int);
 
 /** @brief cat: concatenate files, version 2 (with syscalls)
+ *  	   this is just a rewrite of the version from the book in chapter 7.
+ *  	   No real logic was changed, just the file control methods were changed to
+ *  	   syscalls.
  *
  *  Experiments:
  *
