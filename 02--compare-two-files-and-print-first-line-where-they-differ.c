@@ -65,14 +65,18 @@ void compare_two_files(FILE *first_file, FILE *second_file, char *argv[]) {
   char line_from_first_file[MAX_LINE_LENGTH], line_from_second_file[MAX_LINE_LENGTH];
   int line_number = 0;
 
-  while (true) {
+  // While true, keep reading and comparing lines. The loop breaks when either
+  // file reaches end of file or a difference in line is found
+  while (1) {
     int read_line_from_first_file = fgets(line_from_first_file, MAX_LINE_LENGTH, first_file) != NULL;
     int read_line_from_second_file = fgets(line_from_second_file, MAX_LINE_LENGTH, second_file) != NULL;
     line_number++;
 
+	// Stop searching if both reads were EOF
     if (!read_line_from_first_file && !read_line_from_second_file)
       break;
 
+	// Break if a file ends before the other
     if (!read_line_from_first_file && read_line_from_second_file) {
       // *s means pad the string with variable number of spaces
       // We give it the largest file name so it only pads the shorter one
